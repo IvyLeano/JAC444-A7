@@ -1,10 +1,15 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.util.Arrays;
 
 public class NameRanker {
 	private int m_year;
 	private String m_gender;
 	private String m_babyName;
 	private String m_fileName;
-	private int m_position;
 
 	// default constructor
 	NameRanker() {
@@ -12,7 +17,6 @@ public class NameRanker {
 		m_gender = "\0";
 		m_babyName = "\0";
 		m_fileName = "\0";
-		m_position = 0;
 	};
 
 	// setter methods
@@ -22,7 +26,7 @@ public class NameRanker {
 
 	void setGender(String gender) {
 		// set gender to "Boy" or "Girl", based on 'M' or 'F' input
-		if (gender.charAt(0) == 'M') {
+		if (Character.toUpperCase(gender.charAt(0)) == 'M') {
 			m_gender = "Boy";
 		} else {
 			m_gender = "Girl";
@@ -34,19 +38,9 @@ public class NameRanker {
 	}
 
 	void setFileName() {
-		String filename = "babynameranking";
-		String year =  String.valueOf(getYear());
+		String filename = "babynamesranking";
+		String year = String.valueOf(getYear());
 		m_fileName = filename + year + ".txt";
-		System.out.print(m_fileName);
-	}
-
-	void setPosition() {
-		if(getGender() == "Boy") {
-		//m_position = ;
-		}
-		else {
-			//m_position = ;
-		}
 	}
 
 	// getter methods
@@ -66,10 +60,6 @@ public class NameRanker {
 		return m_fileName;
 	}
 
-	int getPosition() {
-		return m_position;
-	}
-
 	// methods
 	// validates user input for year, gender and name
 	boolean isValid(int year, String gender, String name) {
@@ -85,14 +75,52 @@ public class NameRanker {
 		setYear(year);
 		setBabyName(name);
 		setGender(gender);
-		setPosition();
 		setFileName();
+
 	}
-	//reads file and returns ranking as a string
-	String getRanking(){
-		int rank = 190; //change this to file line, after reading file
-		String ranking = getGender() + " name " + getBabyName() + " is ranked #" + rank + " in " + getYear() + " year";
-		
+
+	// reads file and returns ranking as a string
+	String getRanking() {
+		String rank = "\0"; // this is the ranking number i.e "#160"
+		String ranking = "\0"; // this is the whole line i.e "Boy named Javier is ranked....."
+
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(getFileName()));
+			String line = reader.readLine();
+			// iterate until name is found, then break
+			again: while (line != null) {
+				String[] babyNameData = line.split(" "); // separates each line by a space delimiter, into an array of
+				//isolates boyname and girl name into their own strings											// data
+				String boyName = (babyNameData[1].replaceAll("[^a-zA-Z0-9]", "")).replaceAll("[^a-zA-Z]", ""); 
+				String girlName = babyNameData[2].trim(); // isolate girls name
+
+				// if the user was searching for a boy name and the name input matches one in
+				// the file then set the ranking (factors unisex names).
+				//compares strings not objects in memory
+				if (getGender() == "Boy" && boyName.equalsIgnoreCase(getBabyName())) { 
+					rank = babyNameData[0];
+					break again;
+				}
+				if (getGender() == "Girl" && girlName.equalsIgnoreCase(getBabyName())) {
+					rank = babyNameData[0];
+					break again;
+				}
+
+				// read the next line in the file
+				line = reader.readLine();
+			}
+
+			reader.close();
+		} catch (Exception e) {
+			System.out.print(e + "\n");
+		}
+
+		if (rank != "\0") { // if the name was found in file then create output message
+			ranking = getGender() + " name " + getBabyName() + " is ranked #" + rank + " in " + getYear() + " year";
+		} else {
+			ranking = getGender() + " name " + getBabyName() + " is not on the " + getYear() + " ranking list.";
+
+		}
 		return ranking;
 	}
 
