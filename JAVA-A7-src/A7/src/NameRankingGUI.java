@@ -20,7 +20,7 @@ public class NameRankingGUI extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-       
+       NameRanker nameRanker = new NameRanker();
        //GridPane settings
        year_gender_name.setHgap(6);
        year_gender_name.setVgap(6);
@@ -64,21 +64,22 @@ public class NameRankingGUI extends Application {
        search_again.add(re_search_input, 1, 1);
        search_again.add(btnSubmit, 1, 2, 1, 1);
        btnSubmit.setMaxWidth(Double.MAX_VALUE);
-       search_again.add(btnExit_search_again, 1, 3, 1, 1);
-       btnExit_search_again.setMaxWidth(Double.MAX_VALUE);
        
        //Button on click event handlers
        btnSubmitQuery.setOnAction(event -> {
-    	   primaryStage.setScene(gridpane_search_again);
-    	   /*if(nameRanking.isValid(year_input, gender_input, name_input)){ 
-    	    	nameRanking.setState(year_input, gender_input, name_input);
-    	    	resetNameRanked(nameRanking.getRanking());
-    	        primaryStage.setScene(gridpane_search_again);
-    	     }
-    	     else {
-    	     	resetNameRanked("Invalid input.");
-    	        primaryStage.setScene(gridpane_search_again);
-    	     }*/
+    	   try {
+    		   if(nameRanker.isValid(Integer.valueOf(year_input.getText()), gender_input.getText(), name_input.getText())){ 
+       	    	 nameRanker.setState(Integer.valueOf(year_input.getText()), gender_input.getText(), name_input.getText());
+       	    	 resetNameRanked(nameRanker.getRanking());
+       	         primaryStage.setScene(gridpane_search_again);
+       	     }
+       	     else {
+       	     	throw new Exception();
+       	     }
+    	   }catch(Exception e) {
+    		   resetNameRanked("Invalid input.");
+   	           primaryStage.setScene(gridpane_search_again);
+    	   }	   
        });
        btnSubmit.setOnAction(event -> {
     	   //try catch for line: Character.toUpperCase(re_search_input.getText().charAt(0)) == 'Y'.
@@ -87,6 +88,9 @@ public class NameRankingGUI extends Application {
     	   if(searchAgain()) { 
     		   if(Character.toUpperCase(re_search_input.getText().charAt(0)) == 'Y') {
     	       primaryStage.setScene(gridpane_year_gender_name);
+    	       search_again.getChildren().remove(re_search_input);
+    	       re_search_input = new TextField();
+    	       search_again.add(re_search_input, 1, 1);
     		   }
     		   else {
     			   System.exit(0);
