@@ -1,5 +1,6 @@
 import java.util.Scanner;
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //to do: uservalidation
 //exit option??
 public class ConnectFour {
@@ -87,23 +88,26 @@ public class ConnectFour {
 			}
 		}
 	}
-
+	
 	// returns the grid with current plays
 	void playGame() {
 		char delimiter = '|';
-		while (getTurnCount() < 42 && checkGameStatus() == false) { // there are a maximum of 42 plays, for a 6 by 7
-																	// grid
+		int displayWin = 0;
+	 while (getTurnCount() <= 42 && displayWin != 1) { // there are a maximum of 42 plays, for a 6
+										// by 7
+										// grid
+			
 			for (int i = 0; i < 6; i++) {
 				for (int j = 0; j < 7; j++) {
 					System.out.print(delimiter + getConnectFourGrid(i, j));
 				}
 				System.out.print(delimiter + "\n");
 			}
-			promptPlayerInput();
-			checkGameStatus();
-			setTurnCount();
-			setPlayer();
+			if(checkGameStatus()) {displayWin++;} //allows the final results to show before terminating
+			else{promptPlayerInput();}	
+		
 		}
+		System.out.printf(getGameStatus());
 	}
 
 	// prompts user for position play, stores row, col to object
@@ -111,46 +115,119 @@ public class ConnectFour {
 		Scanner in = new Scanner(System.in);
 		System.out.print("Drop a " + getPlayer() + " disk at column(0-6): ");
 		int col = in.nextInt();
-		setColumn(col);
 
-		getLowestRow(col);
-		if(getLowestRow(col) == 7) {System.out.print("Select another column.\n");}
-		else {setConnectFourGrid(getLowestRow(col), col, getPlayer()); }
-		
-	}
- int getLowestRow(int col) {
- 	int column = 7;
-	check :  for (int i = 5; i > 0; i--) {
-		 if(getConnectFourGrid(i, col) == " ") {
-			 column = i;
-			 break check;
-		 }
-		}
- 	return column;
- }
- 
-	boolean checkGameStatus() {
-		return horizontalWin("R");// && !verticalWin() && !diagonalWin();
-	}
-	boolean horizontalWin(String player) {
-		int count = 0; // counts up to 4, before reset
-	
-		boolean win = false;
-		check: for (int i = 5; i > 0; i--) { // starting at the bottom row
-			for (int j = 6; j >= 0; j--) {
-				if (count == 4 || count == 4) {
-					win = true;
-					break check;
-				}
-				else if (m_connectFourGrid[i][j] == player) {
-					count++;
-				}
-				else {
-					count = 0;
-				}	
+		if (validateInput(col)) {
+			setColumn(col);
+			if (getLowestRow(col) == 7) {
+				System.out.print("Select another column.\n");
+			} else {
+				setConnectFourGrid(getLowestRow(col), getColumn(), getPlayer());
+				setTurnCount();
+				setPlayer();
 			}
-			count = 0;
+		}
+	}
+
+	int getLowestRow(int col) {
+		int column = 7;
+		check: for (int i = 5; i >= 0; i--) {
+			if (getConnectFourGrid(i, col) == " ") {
+				column = i;
+				break check;
+			}
+		}
+		return column;
+	}
+
+	boolean validateInput(int input) {
+		boolean valid = true;
+		if (input < 0 || input > 6) {
+			System.out.print("Invalid input.");
+			valid = false;
+		}
+		return valid;
+	}
+	boolean checkGameStatus() {
+		boolean horizontalWin = horizontalWin("R") || horizontalWin("Y");
+		boolean verticalWin = verticalWin("R") || verticalWin("Y");
+		boolean diagonalWin = diagonalWin("R") || diagonalWin("Y");
+		//diagonalWin("R");
+		return verticalWin || horizontalWin || diagonalWin;
+	}
+
+	boolean horizontalWin(String player) { 
+		boolean win = false;
+		int count = 0;
+		check: for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 7; j++) {
+				if (count == 4) {
+					//System.out.print("==4\n");
+					win = true;
+					setGameStatus("Game Over!");
+					break check;
+				} else if (getConnectFourGrid(i, j) == player) {
+					count++;
+				} else {
+					count = 0;
+				}
+			}
 		}
 		return win;
 	}
-}
+	boolean verticalWin(String player) {
+		boolean win = false;
+		int count = 0;
+		check: for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < 6; j++) {
+				if (count == 4) {
+					//System.out.print("==4\n");
+					win = true;
+					setGameStatus("Game Over!");
+					break check;
+				} else if (getConnectFourGrid(j, i) == player) {
+					count++;
+				} else {
+					count = 0;
+				}
+			}
+	}
+		return win;
+	}
+	boolean diagonalWin(String player) {
+		boolean win = false;
+		int row = 3;  //while row is less than 5
+		int col = 0;  //while col is less than 3
+		int count = 0;
+		int cols = 0;
+		
+	check :	while(cols < 3) {
+			while(row < 5) {
+				inner : while(!win) {
+				try {
+				if (count == 4) {
+					//System.out.print("==4\n");
+					win = true;
+					setGameStatus("Game Over!");
+					break check;
+				} else if (getConnectFourGrid(row, col) == player) {
+					count++;
+				} else {
+					count = 0;
+				}
+				row--;
+				col++;
+				}catch(Exception e) {
+					count = 0;
+					col = 0;
+					row++;
+					
+					break inner;
+				}
+				}
+			}
+		}
+		
+		return win;
+		}
+	}
+
