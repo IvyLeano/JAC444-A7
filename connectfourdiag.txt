@@ -1,0 +1,39 @@
+	boolean diagonalWin(String player) {
+		int count = 0;  //counts how many "R" or "Y" exist in sequence
+		int row = 0;    //row counter, to access index
+		int col = 0;    //col counter
+		int totalRows = 0;  //max rows, goes up to 5 - for the while loop condition
+		boolean nextRow = false;
+		boolean win = false;
+
+		check : while(totalRows < 6) {
+			//System.out.print("total row " + totalRows + "\n");
+			nextRow = false;
+			while(!nextRow) {
+				try {
+					if(count == 4) {
+						//System.out.print("==4");
+						setGameStatus("Game Over!");
+						win = true;
+						break check;
+					}
+					if(getConnectFourGrid(row, col) == player) {
+						//System.out.print("count " + count + "\n");
+						count++;
+					}
+					row--;
+					col++;
+					//System.out.print(row + " " + col + "\n");
+				}catch(Exception e) {
+					totalRows++;
+					row = totalRows;
+					col = 0;
+					count = 0;
+					nextRow = true;
+				}
+			}	
+		
+		}
+		
+		return win;
+	}
